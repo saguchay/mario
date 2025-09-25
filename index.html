@@ -150,9 +150,9 @@
     }
     .controls button {
       pointer-events: auto;
-      width: clamp(50px, 15vw, 60px);
-      height: clamp(50px, 15vw, 60px);
-      font-size: clamp(20px, 6vw, 24px);
+      width: clamp(60px, 18vw, 80px);
+      height: clamp(60px, 18vw, 80px);
+      font-size: clamp(24px, 7vw, 28px);
       opacity: 0.8;
       border-radius: 50%;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
@@ -217,9 +217,9 @@
     }
     @media (max-width: 480px) {
       .controls button {
-        width: clamp(40px, 12vw, 50px);
-        height: clamp(40px, 12vw, 50px);
-        font-size: clamp(16px, 5vw, 20px);
+        width: clamp(50px, 15vw, 70px);
+        height: clamp(50px, 15vw, 70px);
+        font-size: clamp(20px, 6vw, 24px);
       }
       .hud {
         gap: 8px;
@@ -234,7 +234,7 @@
   <div class="wrap">
     <h1>Mini Mario</h1>
     <div class="instructions">
-      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile/tablet, use on-screen buttons (← → for movement, ↑ for jump). Tap full-screen button (↔) to enter full-screen (mobile only, auto-rotates to landscape). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
+      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile/tablet, use on-screen buttons (← → for movement, ↑ for jump). Tap full-screen button (↔) to enter full-screen (mobile only). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
     </div>
     <div class="banner">🏆 Mini Mario Adventure - Conquer All 10 Levels! 🏆</div>
     <div class="level-select">
@@ -299,7 +299,7 @@
         fullscreenBtn.x = W - 90;
         fullscreenBtn.y = 20;
         exitFullscreenBtn.x = W - 90;
-        exitFullscreenBtn.y = 80;
+        exitFullscreenBtn.y = 90;
       } else {
         // Reset to default size when not in full-screen
         W = 960;
@@ -309,7 +309,7 @@
         fullscreenBtn.x = W - 90;
         fullscreenBtn.y = 20;
         exitFullscreenBtn.x = W - 90;
-        exitFullscreenBtn.y = 80;
+        exitFullscreenBtn.y = 90;
       }
     }
 
@@ -495,8 +495,8 @@
 
     // Fullscreen buttons on canvas (mobile only)
     const isMobile = window.innerWidth <= 720;
-    const fullscreenBtn = { x: W - 90, y: 20, w: 70, h: 50, text: '↔', active: isMobile };
-    const exitFullscreenBtn = { x: W - 90, y: 80, w: 70, h: 50, text: '↕', active: false };
+    const fullscreenBtn = { x: W - 90, y: 20, w: 80, h: 60, text: '↔', active: isMobile };
+    const exitFullscreenBtn = { x: W - 90, y: 90, w: 80, h: 60, text: '↕', active: false };
 
     function spawnEntitiesFromMap() {
       coins = [];
@@ -631,12 +631,6 @@
         } else if (canvas.webkitRequestFullscreen) {
           canvas.webkitRequestFullscreen();
         }
-        // Attempt to lock orientation to landscape
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(err => {
-            console.warn('Orientation lock failed:', err);
-          });
-        }
         document.body.classList.add('fullscreen');
         fullscreenBtn.active = false;
         exitFullscreenBtn.active = true;
@@ -646,10 +640,6 @@
           document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
-        }
-        // Unlock orientation
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
         }
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
@@ -664,9 +654,6 @@
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
         exitFullscreenBtn.active = false;
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
-        }
         resizeCanvas();
       } else {
         document.body.classList.add('fullscreen');
@@ -678,20 +665,10 @@
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
         exitFullscreenBtn.active = false;
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
-        }
         resizeCanvas();
       } else {
         document.body.classList.add('fullscreen');
         resizeCanvas();
-      }
-    });
-
-    // Handle orientation change
-    window.addEventListener('orientationchange', () => {
-      if (document.fullscreenElement || document.webkitFullscreenElement) {
-        setTimeout(resizeCanvas, 100); // Delay to ensure orientation change is applied
       }
     });
 
@@ -818,9 +795,6 @@
           document.body.classList.remove('fullscreen');
           fullscreenBtn.active = true;
           exitFullscreenBtn.active = false;
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
           resizeCanvas();
         }
         if (currentLevel < 10) {
@@ -867,9 +841,6 @@
           document.body.classList.remove('fullscreen');
           fullscreenBtn.active = true;
           exitFullscreenBtn.active = false;
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
           resizeCanvas();
         }
       } else {
@@ -936,13 +907,13 @@
 
       ctx.restore();
 
-      // Draw fullscreen buttons and score (mobile only)
+      // Draw fullscreen buttons, score, and level (mobile only)
       if (isMobile) {
         if (fullscreenBtn.active) {
           ctx.fillStyle = '#2b8b57';
           roundRect(ctx, fullscreenBtn.x, fullscreenBtn.y, fullscreenBtn.w, fullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '20px monospace';
+          ctx.font = '24px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(fullscreenBtn.text, fullscreenBtn.x + fullscreenBtn.w / 2, fullscreenBtn.y + fullscreenBtn.h / 2);
@@ -951,18 +922,19 @@
           ctx.fillStyle = '#b31217';
           roundRect(ctx, exitFullscreenBtn.x, exitFullscreenBtn.y, exitFullscreenBtn.w, exitFullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '20px monospace';
+          ctx.font = '24px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(exitFullscreenBtn.text, exitFullscreenBtn.x + exitFullscreenBtn.w / 2, exitFullscreenBtn.y + exitFullscreenBtn.h / 2);
-          // Draw score in full-screen mode
+          // Draw score and level in full-screen mode
           ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-          ctx.fillRect(10, 20, 120, 30);
+          ctx.fillRect(10, 20, 120, 60);
           ctx.fillStyle = '#333';
           ctx.font = '18px monospace';
           ctx.textAlign = 'left';
           ctx.textBaseline = 'middle';
           ctx.fillText('Score: ' + score, 20, 35);
+          ctx.fillText('Level: ' + currentLevel, 20, 65);
         }
       }
     }
