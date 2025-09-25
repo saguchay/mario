@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Mini Mario — HTML/CSS/JS</title>
+  <title>JAYSWAL KO CITY TOOR</title>
   <style>
     html, body {
       margin: 0;
@@ -63,8 +63,8 @@
       max-width: 90%;
       text-align: center;
       font-size: clamp(12px, 3.5vw, 14px);
-      color: #333;
-      border: 2px solid #5c3a21;
+      color: #175504;
+      border: 2px solid #05491f;
     }
     .level-select button {
       margin: 0 5px;
@@ -86,7 +86,7 @@
       background-image: url('images/background.jpg'); /* Custom background image */
       background-size: cover; /* Scale image to cover canvas */
       background-position: center;
-      border: 6px solid #5c3a21;
+      border: 6px solid #064203;
       border-radius: 8px;
       image-rendering: pixelated;
       width: 100%;
@@ -395,8 +395,8 @@
     '           B                                   B                                                  B                      B                              ',
     '                                                                                                                                                          ',
     '           C                                                                C       C                    C             C                               ',
-    '                           C                                    E                        C                E                          E                     ',
-    '       ####            #####     C      #######        E                    ##### F                 #######         E              #####                 ',
+    '            ####               C                                    E                        C                E                          E                     ',
+    '     ####            #####     C      #######        E                    ##### F                 #######         E              #####                 ',
     '                     B             B                                             B                       B                          B                    ',
     ' P      #####               ####        #####       #######          ####   ###                #######          ####   ###             ####   ###       ',
     '#######################################################################################################################################################'
@@ -865,7 +865,7 @@
           const ch = world[r][c];
           const x = c * TILE, y = r * TILE;
           if (ch === '#' || ch === 'B') {
-            ctx.fillStyle = (ch === 'B') ? '#b5651d' : '#8b4513';
+            ctx.fillStyle = (ch === 'B') ? '#0F4206' : '#176709';
             roundRect(ctx, x, y, TILE, TILE, 4, true, false);
             ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(x + 4, y + 3, TILE - 8, 6);
           }
@@ -943,18 +943,34 @@
       }
     }
 
-    function drawPlayer(x, y) {
-      ctx.save();
-      ctx.scale(player.facing, 1);
-      ctx.translate(x * player.facing, y);
-      ctx.fillStyle = '#ff595e'; ctx.fillRect(4, 8, 18, 16);
-      ctx.fillStyle = '#1d4e89'; ctx.fillRect(4, 18, 18, 8);
-      ctx.fillStyle = '#f1c27d'; ctx.fillRect(6, 0, 14, 12);
-      ctx.fillStyle = '#b31217'; ctx.fillRect(4, 0, 18, 6);
-      ctx.fillStyle = '#000'; ctx.fillRect(10, 4, 3, 3);
-      ctx.fillRect(14, 4, 3, 3);
-      ctx.restore();
-    }
+function drawPlayer(x, y) {
+  ctx.save();
+  ctx.scale(player.facing, 1);
+  ctx.translate(x * player.facing, y);
+
+  // Body (Torso and Legs) - Now Wine Red! 🍷
+  ctx.fillStyle = '#800020'; // Wine Red (a deep, rich crimson)
+  ctx.fillRect(4, 8, 18, 16);
+
+  // Pants/Lower body - Light Gray (maintained for contrast)
+  ctx.fillStyle = '#cccccc';
+  ctx.fillRect(4, 18, 18, 8);
+
+  // Head/Skin Tone - Very Light Peach/Skin Tone
+  ctx.fillStyle = '#ffe0bd';
+  ctx.fillRect(6, 0, 14, 12);
+
+  // Hat/Hair - Bright Accent Color (Sky Blue maintained, or you could change it!)
+  ctx.fillStyle = '#66a3ff'; 
+  ctx.fillRect(4, 0, 18, 6);
+
+  // Eyes - Black
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(10, 4, 3, 3);
+  ctx.fillRect(14, 4, 3, 3);
+
+  ctx.restore();
+}
 
     function roundRect(ctx, x, y, w, h, r, fill, stroke) {
       if (typeof r === 'undefined') r = 5;
