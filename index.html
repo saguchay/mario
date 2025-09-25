@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Mini Mario — HTML/CSS/JS</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(#87ceeb, #b0e0e6);
+      font-family: monospace;
+      touch-action: none; /* Prevent pinch-zoom and double-tap zoom */
+      overflow-x: hidden;
+    }
+    .wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin: 10px 0;
+      font-size: clamp(20px, 5vw, 24px);
+      color: #b31217;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    .instructions {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      max-width: 90%;
+      text-align: center;
+      font-size: clamp(12px, 3.5vw, 14px);
+      color: #333;
+      border: 2px solid #5c3a21;
+    }
+    .banner {
+      width: 100%;
+      max-width: 960px;
+      height: clamp(120px, 25vw, 150px);
+      background: #8b4513;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .level-select {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      max-width: 90%;
+      text-align: center;
+      font-size: clamp(12px, 3.5vw, 14px);
+      color: #333;
+      border: 2px solid #5c3a21;
+    }
+    .level-select button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      background: #b31217;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: clamp(12px, 3vw, 14px);
+    }
+    .level-select button:hover {
+      background: #a00d13;
+    }
+    .level-select button.active {
+      background: #2b8b57;
+    }
+    canvas {
+      background: transparent;
+      border: 6px solid #5c3a21;
+      border-radius: 8px;
+      image-rendering: pixelated;
+      width: 100%;
+      max-width: 960px;
+      height: auto;
+      aspect-ratio: 960 / 360;
+      touch-action: none;
+    }
+    .hud {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 960px;
+    }
+    .hud div {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: clamp(12px, 3.5vw, 14px);
+    }
+    button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 0;
+      background: #2b8b57;
+      color: #fff;
+      cursor: pointer;
+      font-size: clamp(12px, 3.5vw, 14px);
+      touch-action: manipulation;
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+    .footer {
+      margin-top: 12px;
+      text-align: center;
+      color: #333;
+      font-size: clamp(10px, 3vw, 12px);
+      width: 100%;
+    }
+    .footer a {
+      color: #b31217;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .controls {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      max-width: 960px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .controls button {
+      pointer-events: auto;
+      width: clamp(50px, 15vw, 60px);
+      height: clamp(50px, 15vw, 60px);
+      font-size: clamp(20px, 6vw, 24px);
+      opacity: 0.8;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      background: #2b8b57;
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .controls .left-right {
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .controls .jump {
+      position: absolute;
+      bottom: 0;
+      right: 10px;
+    }
+    @media (max-width: 720px) {
+      .controls {
+        display: flex;
+      }
+      .instructions {
+        max-width: 95%;
+      }
+      .level-select {
+        max-width: 95%;
+      }
+      .banner {
+        max-width: 95%;
+      }
+      canvas {
+        max-width: 100%;
+      }
+    }
+    @media (max-width: 480px) {
+      .controls button {
+        width: clamp(40px, 12vw, 50px);
+        height: clamp(40px, 12vw, 50px);
+        font-size: clamp(16px, 5vw, 20px);
+      }
+      .hud {
+        gap: 8px;
+      }
+      .hud div, button {
+        font-size: clamp(10px, 3vw, 12px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mini Mario</h1>
+    <div class="instructions">
+      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile, use on-screen buttons (← → for movement, ↑ for jump). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
+    </div>
+    <div class="banner">🏆 Mini Mario Adventure - Conquer All 10 Levels! 🏆</div>
+    <div class="level-select">
+      <strong>Select Level:</strong>
+      <div style="margin-top: 8px;">
+        <button id="level1" class="active">1</button>
+        <button id="level2">2</button>
+        <button id="level3">3</button>
+        <button id="level4">4</button>
+        <button id="level5">5</button>
+        <button id="level6">6</button>
+        <button id="level7">7</button>
+        <button id="level8">8</button>
+        <button id="level9">9</button>
+        <button id="level10">10</button>
+      </div>
+    </div>
+    <canvas id="game" width="960" height="360"></canvas>
+    <div class="hud">
+      <div id="score">Score: 0</div>
+      <div id="lives">Lives: 3</div>
+      <div id="current-level">Level: 1</div>
+      <div id="message">Use ← → to move, ↑/Space to jump</div>
+      <button id="restart">Restart</button>
+    </div>
+    <div class="footer">
+      <div>Developed by rstechzen: <a href="https://rstechzen.rf.gd/" target="_blank">https://rstechzen.rf.gd/</a></div>
+      <div>Contact: 9808942229</div>
+    </div>
+    <div class="controls">
+      <div class="left-right">
+        <button id="left-btn">←</button>
+        <button id="right-btn">→</button>
+      </div>
+      <button id="jump-btn" class="jump">↑</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Tile / world configuration
+    const TILE = 32;
+    const COLS = Math.ceil(W / TILE) + 4;
+    const ROWS = Math.ceil(H / TILE) + 2;
+
+    // Level designs: Extended and unique obstacles
+    const levels = [
+      // Level 1: Basic tutorial with extended length
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                                                        C       ',
+        '                           C                                    E                            ',
+        '       ####            #####     C      #######        E                            F       ',
+        '                     B                                                        #####       ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 2: Gap obstacle
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C     C                                                                  C       ',
+        '                           C     C          E                      E                        ',
+        '       ####            #####           #######        E                        ##### F     ',
+        '                     B          ###               ####                                        ',
+        ' P      #####               ####        #####            #######          ####   ###      ',
+        '############################## ##### ##### ##### ############## ############## ######## ###'
+      ],
+      // Level 3: Floating platforms
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                   B                                             ',
+        '                                                                                            ',
+        '                   C                                                                C       ',
+        '                           C                                    E                            ',
+        '       ####            #####     C      #######        E                    ##### F         ',
+        '                     B                     C                                             ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 4: Spikes (S) as new obstacle
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                                                        C       ',
+        '                                                                                            ',
+        '                           C                                    E                            ',
+        '       ####            #####     C      #######        E       SSSS         ##### F         ',
+        '                     B                                                        #####       ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 5: Multiple enemies and gaps
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                                                C       C       ',
+        '                           C                                    E                            ',
+        '       ####            #####     C      #######        E        E           ##### F         ',
+        '                     B                       #####                                        ',
+        ' P      #####               ####        #####            #######          ####   ###      ',
+        '############################## ##### ##### ##### ############## ############## ######## ###'
+      ],
+      // Level 6: Moving platform simulation (more bricks)
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           B                                   B                                             ',
+        '                                                                                            ',
+        '           C                                                                C       C       ',
+        '                           C                                    E                            ',
+        '       ####            #####     C      #######        E                    ##### F         ',
+        '                     B             B                                             B         ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 7: High platforms and spikes
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '           B                                                                        B       ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                                                C               ',
+        '       ####            #####     C      #######        E                            F       ',
+        '                     B                           B       SSSS                            ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 8: Coin-heavy with gaps
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C     C                                                          C       C       ',
+        '           C     C                                                          C       C       ',
+        '                           C     C          E                      E                        ',
+        '       ####            #####     C      #######        E                        ##### F     ',
+        '                     B                       #####                                        ',
+        ' P      #####               ####        #####            #######          ####   ###      ',
+        '############################## ##### ##### ##### ############## ############## ######## ###'
+      ],
+      // Level 9: Enemy gauntlet with spikes
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '                                                                                            ',
+        '           C                                                                C       C       ',
+        '                           C                                    E       E                    ',
+        '       ####            #####     C      #######        E       SSSS         ##### F         ',
+        '                     B             B                                             B         ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ],
+      // Level 10: Final challenge with all obstacles
+      [
+        '                                                                                            ',
+        '                                                                                            ',
+        '           B                                                                B       B       ',
+        '                                                                                            ',
+        '           C                                                                C       C       ',
+        '           C                                                                C       C       ',
+        '                           C                                    E       E                    ',
+        '       ####            #####     C      #######        E       SSSS         ##### F         ',
+        '                     B             B                       B                             ',
+        ' P      #####               ####        #####       #######          ####   ###           ',
+        '############################## ############## ############## ############## ######## #####'
+      ]
+    ];
+
+    let currentLevel = 1;
+    let world = [];
+    let levelMap = levels[0];
+
+    function buildWorld() {
+      world = [];
+      for (let r = 0; r < levelMap.length; r++) {
+        const row = levelMap[r].split('');
+        world.push(row);
+      }
+    }
+
+    // Player
+    const player = {
+      x: 64,
+      y: 0,
+      w: 26,
+      h: 28,
+      vx: 0,
+      vy: 0,
+      speed: 2.2,
+      jumpPower: 7.2,
+      facing: 1,
+      onGround: false
+    };
+
+    let cameraX = 0;
+    let score = 0;
+    let lives = 3;
+    let messageEl = document.getElementById('message');
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+    const levelEl = document.getElementById('current-level');
+    let gameOver = false;
+    let gameWin = false;
+
+    // Entities
+    let coins = [];
+    let enemies = [];
+    let finish = null;
+    let spikes = [];
+
+    function spawnEntitiesFromMap() {
+      coins = [];
+      enemies = [];
+      finish = null;
+      spikes = [];
+      for (let r = 0; r < world.length; r++) {
+        for (let c = 0; c < world[r].length; c++) {
+          const ch = world[r][c];
+          if (ch === 'P') {
+            player.x = c * TILE + 4;
+            player.y = r * TILE - player.h;
+            world[r][c] = ' ';
+          }
+          if (ch === 'C') {
+            coins.push({ x: c * TILE + TILE / 4, y: r * TILE + TILE / 4, w: TILE / 2, h: TILE / 2, taken: false });
+            world[r][c] = ' ';
+          }
+          if (ch === 'E') {
+            enemies.push({ x: c * TILE, y: r * TILE, w: 28, h: 28, vx: -1.2, alive: true });
+            world[r][c] = ' ';
+          }
+          if (ch === 'F') {
+            finish = { x: c * TILE, y: r * TILE, w: TILE, h: TILE * 1.6 };
+            world[r][c] = ' ';
+          }
+          if (ch === 'S') {
+            spikes.push({ x: c * TILE, y: r * TILE, w: TILE, h: TILE });
+            world[r][c] = ' ';
+          }
+        }
+      }
+    }
+
+    // Level selection
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.getElementById(`level${i}`);
+      btn.addEventListener('click', () => {
+        if (gameOver || gameWin) {
+          currentLevel = i;
+          loadLevel(i);
+          init();
+        } else {
+          alert('Finish current level first or restart to change level.');
+        }
+      });
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameOver || gameWin) {
+          currentLevel = i;
+          loadLevel(i);
+          init();
+        } else {
+          alert('Finish current level first or restart to change level.');
+        }
+      });
+    }
+
+    function loadLevel(levelNum) {
+      if (levelNum < 1 || levelNum > 10) return;
+      levelMap = levels[levelNum - 1];
+      currentLevel = levelNum;
+      levelEl.innerText = `Level: ${currentLevel}`;
+      document.querySelectorAll('.level-select button').forEach(b => b.classList.remove('active'));
+      document.getElementById(`level${levelNum}`).classList.add('active');
+    }
+
+    // Input
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      keys[e.code] = true;
+      if (['ArrowUp', 'Space', 'KeyW'].includes(e.code)) e.preventDefault();
+    });
+    window.addEventListener('keyup', e => { keys[e.code] = false });
+
+    // Touch controls
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    const jumpBtn = document.getElementById('jump-btn');
+
+    leftBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowLeft'] = true;
+    });
+    leftBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowLeft'] = false;
+    });
+    rightBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowRight'] = true;
+    });
+    rightBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowRight'] = false;
+    });
+    jumpBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      keys['ArrowUp'] = true;
+    });
+    jumpBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowUp'] = false;
+    });
+
+    // Prevent context menu on long press
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Restart
+    document.getElementById('restart').addEventListener('click', () => { init(); });
+    document.getElementById('restart').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      init();
+    });
+
+    // Physics helpers
+    const GRAVITY = 0.36;
+    function rectIntersect(a, b) {
+      return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h);
+    }
+
+    function tileAt(px, py) {
+      const c = Math.floor(px / TILE);
+      const r = Math.floor(py / TILE);
+      if (r < 0 || r >= world.length || c < 0 || c >= world[0].length) return ' ';
+      return world[r][c];
+    }
+
+    function solidAtTileChar(ch) {
+      return ch === '#' || ch === 'B';
+    }
+
+    // Update loop
+    function update() {
+      if (gameOver || gameWin) return;
+      // input
+      let move = 0;
+      if (keys['ArrowLeft'] || keys['KeyA']) { move = -1; player.facing = -1 }
+      if (keys['ArrowRight'] || keys['KeyD']) { move = 1; player.facing = 1 }
+      player.vx = move * player.speed;
+
+      // jump
+      if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.onGround) {
+        player.vy = -player.jumpPower; player.onGround = false;
+      }
+
+      // apply gravity
+      player.vy += GRAVITY;
+      if (player.vy > 12) player.vy = 12;
+
+      // tentative movement
+      let nx = player.x + player.vx;
+      let ny = player.y + player.vy;
+
+      // horizontal collision
+      const hbox = { x: nx, y: player.y, w: player.w, h: player.h };
+      player.onGround = false;
+      const corners = [
+        { x: hbox.x, y: hbox.y },
+        { x: hbox.x + hbox.w, y: hbox.y },
+        { x: hbox.x, y: hbox.y + hbox.h },
+        { x: hbox.x + hbox.w, y: hbox.y + hbox.h }
+      ];
+      for (const pt of corners) {
+        const ch = tileAt(pt.x, pt.y);
+        if (solidAtTileChar(ch)) {
+          if (player.vx > 0) nx = Math.floor(pt.x / TILE) * TILE - player.w - 0.0001;
+          if (player.vx < 0) nx = Math.floor(pt.x / TILE + 1) * TILE + 0.0001;
+          player.vx = 0;
+        }
+      }
+
+      // vertical collision
+      const vbox = { x: nx, y: ny, w: player.w, h: player.h };
+      const vcorners = [
+        { x: vbox.x, y: vbox.y },
+        { x: vbox.x + vbox.w, y: vbox.y },
+        { x: vbox.x, y: vbox.y + vbox.h },
+        { x: vbox.x + vbox.w, y: vbox.y + vbox.h }
+      ];
+      for (const pt of vcorners) {
+        const ch = tileAt(pt.x, pt.y);
+        if (solidAtTileChar(ch)) {
+          if (player.vy > 0) {
+            ny = Math.floor(pt.y / TILE) * TILE - player.h - 0.0001;
+            player.vy = 0; player.onGround = true;
+          } else if (player.vy < 0) {
+            ny = Math.floor(pt.y / TILE + 1) * TILE + 0.0001;
+            player.vy = 0;
+          }
+        }
+      }
+
+      player.x = nx; player.y = ny;
+
+      // camera follow
+      cameraX = player.x - W / 2 + player.w / 2;
+      if (cameraX < 0) cameraX = 0;
+      const maxCam = world[0].length * TILE - W;
+      if (cameraX > maxCam) cameraX = maxCam;
+
+      // collect coins
+      for (const coin of coins) if (!coin.taken) {
+        if (rectIntersect({ x: player.x, y: player.y, w: player.w, h: player.h }, coin)) {
+          coin.taken = true; score += 10; scoreEl.innerText = 'Score: ' + score;
+        }
+      }
+
+      // spikes
+      for (const spike of spikes) {
+        if (rectIntersect({ x: player.x, y: player.y, w: player.w, h: player.h }, spike)) {
+          takeDamage();
+        }
+      }
+
+      // finish
+      if (finish && rectIntersect({ x: player.x, y: player.y, w: player.w, h: player.h }, finish)) {
+        gameWin = true; 
+        messageEl.innerText = `Level ${currentLevel} Complete! Score: ${score}. Press Restart for next level.`;
+        if (currentLevel < 10) {
+          setTimeout(() => {
+            currentLevel++;
+            loadLevel(currentLevel);
+            init();
+          }, 2000);
+        } else {
+          messageEl.innerText += ' You beat all 10 levels! Congratulations!';
+        }
+      }
+
+      // enemies update
+      for (const en of enemies) {
+        if (!en.alive) continue;
+        en.x += en.vx;
+        const below = tileAt(en.x + en.w / 2, en.y + en.h + 2);
+        if (!solidAtTileChar(below)) en.vx = -en.vx;
+        const wall = tileAt(en.x + (en.vx > 0 ? en.w + 1 : -1), en.y + en.h / 2);
+        if (solidAtTileChar(wall)) en.vx = -en.vx;
+
+        if (rectIntersect({ x: player.x, y: player.y, w: player.w, h: player.h }, en)) {
+          if (player.vy > 0) {
+            en.alive = false; player.vy = -4; score += 20; scoreEl.innerText = 'Score: ' + score;
+          } else {
+            takeDamage();
+          }
+        }
+      }
+    }
+
+    function takeDamage() {
+      lives -= 1; livesEl.innerText = 'Lives: ' + lives;
+      if (lives <= 0) { 
+        gameOver = true; 
+        messageEl.innerText = `Game Over at Level ${currentLevel}. Press or tap Restart.`;
+      } else {
+        messageEl.innerText = 'Ouch! Lost a life.';
+        player.x = 64; player.y = 0; player.vx = 0; player.vy = 0;
+      }
+    }
+
+    // Draw functions
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      // draw ground tiles
+      for (let r = 0; r < world.length; r++) {
+        for (let c = 0; c < world[r].length; c++) {
+          const ch = world[r][c];
+          const x = c * TILE, y = r * TILE;
+          if (ch === '#' || ch === 'B') {
+            ctx.fillStyle = (ch === 'B') ? '#b5651d' : '#8b4513';
+            roundRect(ctx, x, y, TILE, TILE, 4, true, false);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(x + 4, y + 3, TILE - 8, 6);
+          }
+        }
+      }
+
+      // coins
+      for (const coin of coins) if (!coin.taken) {
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath(); ctx.ellipse(coin.x + coin.w / 2, coin.y + coin.h / 2, coin.w / 2, coin.h / 2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1; ctx.stroke();
+      }
+
+      // enemies
+      for (const en of enemies) {
+        if (!en.alive) continue;
+        ctx.fillStyle = '#a40000';
+        ctx.fillRect(en.x + 2, en.y + 2, en.w - 4, en.h - 4);
+        ctx.fillStyle = '#000'; ctx.fillRect(en.x + 6, en.y + 8, 5, 6); ctx.fillRect(en.x + en.w - 11, en.y + 8, 5, 6);
+      }
+
+      // spikes
+      for (const spike of spikes) {
+        ctx.fillStyle = '#555';
+        ctx.beginPath();
+        ctx.moveTo(spike.x, spike.y + spike.h);
+        ctx.lineTo(spike.x + spike.w / 2, spike.y);
+        ctx.lineTo(spike.x + spike.w, spike.y + spike.h);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // finish flag
+      if (finish) {
+        ctx.fillStyle = '#4b8b3b'; ctx.fillRect(finish.x + finish.w - 8, finish.y - finish.h / 2, 6, finish.h + 8);
+        ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.moveTo(finish.x + finish.w - 6, finish.y - finish.h / 2 + 6);
+        ctx.lineTo(finish.x + finish.w + 18, finish.y - finish.h / 2 + 16);
+        ctx.lineTo(finish.x + finish.w - 6, finish.y - finish.h / 2 + 26); ctx.closePath(); ctx.fill();
+      }
+
+      // player
+      drawPlayer(player.x, player.y);
+
+      ctx.restore();
+    }
+
+    function drawPlayer(x, y) {
+      ctx.save();
+      ctx.scale(player.facing, 1);
+      ctx.translate(x * player.facing, y);
+      ctx.fillStyle = '#ff595e'; ctx.fillRect(4, 8, 18, 16);
+      ctx.fillStyle = '#1d4e89'; ctx.fillRect(4, 18, 18, 8);
+      ctx.fillStyle = '#f1c27d'; ctx.fillRect(6, 0, 14, 12);
+      ctx.fillStyle = '#b31217'; ctx.fillRect(4, 0, 18, 6);
+      ctx.fillStyle = '#000'; ctx.fillRect(10, 4, 3, 3);
+      ctx.fillRect(14, 4, 3, 3);
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      if (typeof r === 'undefined') r = 5;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // Game loop
+    let last = 0;
+    function loop(ts) {
+      const dt = ts - last; last = ts;
+      update(); draw();
+      requestAnimationFrame(loop);
+    }
+
+    function init() {
+      buildWorld(); spawnEntitiesFromMap();
+      gameOver = false; gameWin = false;
+      scoreEl.innerText = 'Score: ' + score; livesEl.innerText = 'Lives: ' + lives;
+      levelEl.innerText = `Level: ${currentLevel}`;
+      messageEl.innerText = 'Use ← → to move, ↑/Space to jump';
+      requestAnimationFrame(loop);
+    }
+
+    // Initial load
+    loadLevel(1);
+    init();
+  </script>
+</body>
+</html>
