@@ -9,10 +9,10 @@
       margin: 0;
       background: linear-gradient(#87ceeb, #b0e0e6);
       font-family: monospace;
-      touch-action: none;
       overflow-x: hidden;
       overflow-y: auto; /* Enable vertical scrolling */
       min-height: 100vh;
+      touch-action: manipulation; /* Allow touch events for scrolling and controls */
     }
     .wrap {
       display: flex;
@@ -191,8 +191,8 @@
       canvas {
         max-width: 100%;
       }
-      /* Hide UI elements in full-screen mode */
-      .fullscreen .wrap > *:not(canvas) {
+      /* Hide UI elements in full-screen mode except controls */
+      .fullscreen .wrap > *:not(canvas):not(.controls) {
         display: none;
       }
       .fullscreen .controls {
@@ -205,6 +205,11 @@
         border: none;
         border-radius: 0;
         margin: 0;
+      }
+      /* Ensure scrolling works when not in full-screen */
+      body:not(.fullscreen) {
+        overflow-y: auto;
+        touch-action: auto;
       }
     }
     @media (max-width: 480px) {
@@ -452,8 +457,8 @@
 
     // Fullscreen buttons on canvas (mobile only)
     const isMobile = window.innerWidth <= 720;
-    const fullscreenBtn = { x: W - 80, y: 20, w: 60, h: 40, text: '↔', active: isMobile };
-    const exitFullscreenBtn = { x: W - 80, y: 70, w: 60, h: 40, text: '↕', active: false };
+    const fullscreenBtn = { x: W - 90, y: 20, w: 70, h: 50, text: '↔', active: isMobile };
+    const exitFullscreenBtn = { x: W - 90, y: 80, w: 70, h: 50, text: '↕', active: false };
 
     function spawnEntitiesFromMap() {
       coins = [];
@@ -878,13 +883,13 @@
 
       ctx.restore();
 
-      // Draw fullscreen buttons (mobile only)
+      // Draw fullscreen buttons and score (mobile only)
       if (isMobile) {
         if (fullscreenBtn.active) {
           ctx.fillStyle = '#2b8b57';
           roundRect(ctx, fullscreenBtn.x, fullscreenBtn.y, fullscreenBtn.w, fullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '18px monospace';
+          ctx.font = '20px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(fullscreenBtn.text, fullscreenBtn.x + fullscreenBtn.w / 2, fullscreenBtn.y + fullscreenBtn.h / 2);
@@ -893,10 +898,18 @@
           ctx.fillStyle = '#b31217';
           roundRect(ctx, exitFullscreenBtn.x, exitFullscreenBtn.y, exitFullscreenBtn.w, exitFullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '18px monospace';
+          ctx.font = '20px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(exitFullscreenBtn.text, exitFullscreenBtn.x + exitFullscreenBtn.w / 2, exitFullscreenBtn.y + exitFullscreenBtn.h / 2);
+          // Draw score in full-screen mode
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+          ctx.fillRect(10, 20, 120, 30);
+          ctx.fillStyle = '#333';
+          ctx.font = '18px monospace';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('Score: ' + score, 20, 35);
         }
       }
     }
