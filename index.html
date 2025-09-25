@@ -6,12 +6,13 @@
   <title>Mini Mario — HTML/CSS/JS</title>
   <style>
     html, body {
-      height: 100%;
       margin: 0;
       background: linear-gradient(#87ceeb, #b0e0e6);
       font-family: monospace;
       touch-action: none;
       overflow-x: hidden;
+      overflow-y: auto; /* Enable vertical scrolling */
+      min-height: 100vh;
     }
     .wrap {
       display: flex;
@@ -225,7 +226,7 @@
   <div class="wrap">
     <h1>Mini Mario</h1>
     <div class="instructions">
-      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile/tablet, use on-screen buttons (← → for movement, ↑ for jump). Tap full-screen button (↔) to enter full-screen (mobile only). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
+      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile/tablet, use on-screen buttons (← → for movement, ↑ for jump). Tap full-screen button (↔) to enter full-screen (mobile only, auto-rotates to landscape). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
     </div>
     <div class="banner">🏆 Mini Mario Adventure - Conquer All 10 Levels! 🏆</div>
     <div class="level-select">
@@ -451,8 +452,8 @@
 
     // Fullscreen buttons on canvas (mobile only)
     const isMobile = window.innerWidth <= 720;
-    const fullscreenBtn = { x: W - 70, y: 20, w: 50, h: 30, text: '↔', active: isMobile };
-    const exitFullscreenBtn = { x: W - 70, y: 60, w: 50, h: 30, text: '↕', active: false };
+    const fullscreenBtn = { x: W - 80, y: 20, w: 60, h: 40, text: '↔', active: isMobile };
+    const exitFullscreenBtn = { x: W - 80, y: 70, w: 60, h: 40, text: '↕', active: false };
 
     function spawnEntitiesFromMap() {
       coins = [];
@@ -587,6 +588,12 @@
         } else if (canvas.webkitRequestFullscreen) {
           canvas.webkitRequestFullscreen();
         }
+        // Attempt to lock orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(err => {
+            console.warn('Orientation lock failed:', err);
+          });
+        }
         document.body.classList.add('fullscreen');
         fullscreenBtn.active = false;
         exitFullscreenBtn.active = true;
@@ -595,6 +602,10 @@
           document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
+        }
+        // Unlock orientation
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
         }
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
@@ -608,6 +619,9 @@
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
         exitFullscreenBtn.active = false;
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
       } else {
         document.body.classList.add('fullscreen');
       }
@@ -617,6 +631,9 @@
         document.body.classList.remove('fullscreen');
         fullscreenBtn.active = true;
         exitFullscreenBtn.active = false;
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
       } else {
         document.body.classList.add('fullscreen');
       }
@@ -745,6 +762,9 @@
           document.body.classList.remove('fullscreen');
           fullscreenBtn.active = true;
           exitFullscreenBtn.active = false;
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
         }
         if (currentLevel < 10) {
           setTimeout(() => {
@@ -790,6 +810,9 @@
           document.body.classList.remove('fullscreen');
           fullscreenBtn.active = true;
           exitFullscreenBtn.active = false;
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
         }
       } else {
         messageEl.innerText = 'Ouch! Lost a life.';
@@ -861,7 +884,7 @@
           ctx.fillStyle = '#2b8b57';
           roundRect(ctx, fullscreenBtn.x, fullscreenBtn.y, fullscreenBtn.w, fullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '16px monospace';
+          ctx.font = '18px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(fullscreenBtn.text, fullscreenBtn.x + fullscreenBtn.w / 2, fullscreenBtn.y + fullscreenBtn.h / 2);
@@ -870,7 +893,7 @@
           ctx.fillStyle = '#b31217';
           roundRect(ctx, exitFullscreenBtn.x, exitFullscreenBtn.y, exitFullscreenBtn.w, exitFullscreenBtn.h, 5, true, false);
           ctx.fillStyle = '#fff';
-          ctx.font = '16px monospace';
+          ctx.font = '18px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(exitFullscreenBtn.text, exitFullscreenBtn.x + exitFullscreenBtn.w / 2, exitFullscreenBtn.y + exitFullscreenBtn.h / 2);
