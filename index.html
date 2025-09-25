@@ -10,7 +10,7 @@
       margin: 0;
       background: linear-gradient(#87ceeb, #b0e0e6);
       font-family: monospace;
-      touch-action: none; /* Prevent pinch-zoom and double-tap zoom */
+      touch-action: none;
       overflow-x: hidden;
     }
     .wrap {
@@ -210,7 +210,7 @@
   <div class="wrap">
     <h1>Mini Mario</h1>
     <div class="instructions">
-      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile, use on-screen buttons (← → for movement, ↑ for jump). Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
+      <strong>How to Play:</strong> Use ← or A / → or D to move Mario. Press ↑, Space, or W to jump. On mobile, use on-screen buttons (← → for movement, ↑ for jump). Tap full-screen button (↔) to toggle full-screen. Collect coins for 10 points, stomp enemies for 20 points, avoid spikes (S), and reach the flag to win. Avoid enemy collisions to prevent losing lives. You have 3 lives. Press Restart to play again.
     </div>
     <div class="banner">🏆 Mini Mario Adventure - Conquer All 10 Levels! 🏆</div>
     <div class="level-select">
@@ -259,9 +259,8 @@
     const COLS = Math.ceil(W / TILE) + 4;
     const ROWS = Math.ceil(H / TILE) + 2;
 
-    // Level designs: Extended and unique obstacles
+    // Level designs: Extended with unique obstacles
     const levels = [
-      // Level 1: Basic tutorial with extended length
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -275,7 +274,6 @@
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 2: Gap obstacle
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -284,12 +282,11 @@
         '                                                                                            ',
         '           C     C                                                                  C       ',
         '                           C     C          E                      E                        ',
-        '       ####            #####           #######        E                        ##### F     ',
-        '                     B          ###               ####                                        ',
+        '       ####            #####     C      #######        E                        ##### F     ',
+        '                     B                       #####                                        ',
         ' P      #####               ####        #####            #######          ####   ###      ',
         '############################## ##### ##### ##### ############## ############## ######## ###'
       ],
-      // Level 3: Floating platforms
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -299,11 +296,10 @@
         '                   C                                                                C       ',
         '                           C                                    E                            ',
         '       ####            #####     C      #######        E                    ##### F         ',
-        '                     B                     C                                             ',
+        '                     B                     B                                             ',
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 4: Spikes (S) as new obstacle
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -317,7 +313,6 @@
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 5: Multiple enemies and gaps
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -331,7 +326,6 @@
         ' P      #####               ####        #####            #######          ####   ###      ',
         '############################## ##### ##### ##### ############## ############## ######## ###'
       ],
-      // Level 6: Moving platform simulation (more bricks)
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -345,7 +339,6 @@
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 7: High platforms and spikes
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -358,7 +351,6 @@
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 8: Coin-heavy with gaps
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -372,7 +364,6 @@
         ' P      #####               ####        #####            #######          ####   ###      ',
         '############################## ##### ##### ##### ############## ############## ######## ###'
       ],
-      // Level 9: Enemy gauntlet with spikes
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -386,7 +377,6 @@
         ' P      #####               ####        #####       #######          ####   ###           ',
         '############################## ############## ############## ############## ######## #####'
       ],
-      // Level 10: Final challenge with all obstacles
       [
         '                                                                                            ',
         '                                                                                            ',
@@ -443,6 +433,10 @@
     let enemies = [];
     let finish = null;
     let spikes = [];
+
+    // Fullscreen buttons on canvas
+    const fullscreenBtn = { x: W - 70, y: 20, w: 50, h: 30, text: '↔', active: true };
+    const exitFullscreenBtn = { x: W - 70, y: 60, w: 50, h: 30, text: '↕', active: false };
 
     function spawnEntitiesFromMap() {
       coins = [];
@@ -548,7 +542,63 @@
       keys['ArrowUp'] = false;
     });
 
-    // Prevent context menu on long press
+    // Canvas click/touch for fullscreen buttons
+    canvas.addEventListener('click', handleCanvasClick);
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleCanvasClick(e);
+    });
+
+    function handleCanvasClick(e) {
+      if (gameOver || gameWin) return;
+      let clientX, clientY;
+      if (e.type === 'touchstart') {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+
+      if (fullscreenBtn.active && x >= fullscreenBtn.x && x <= fullscreenBtn.x + fullscreenBtn.w && y >= fullscreenBtn.y && y <= fullscreenBtn.y + fullscreenBtn.h) {
+        if (canvas.requestFullscreen) {
+          canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) {
+          canvas.webkitRequestFullscreen();
+        }
+        fullscreenBtn.active = false;
+        exitFullscreenBtn.active = true;
+      } else if (exitFullscreenBtn.active && x >= exitFullscreenBtn.x && x <= exitFullscreenBtn.x + exitFullscreenBtn.w && y >= exitFullscreenBtn.y && y <= exitFullscreenBtn.y + exitFullscreenBtn.h) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        fullscreenBtn.active = true;
+        exitFullscreenBtn.active = false;
+      }
+    }
+
+    // Handle fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fullscreenBtn.active = true;
+        exitFullscreenBtn.active = false;
+      }
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      if (!document.webkitFullscreenElement) {
+        fullscreenBtn.active = true;
+        exitFullscreenBtn.active = false;
+      }
+    });
+
+    // Prevent context menu
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // Restart
@@ -661,7 +711,7 @@
       // finish
       if (finish && rectIntersect({ x: player.x, y: player.y, w: player.w, h: player.h }, finish)) {
         gameWin = true; 
-        messageEl.innerText = `Level ${currentLevel} Complete! Score: ${score}. Press Restart for next level.`;
+        messageEl.innerText = `Level ${currentLevel} Complete! Score: ${score}. Press or tap Restart for next level.`;
         if (currentLevel < 10) {
           setTimeout(() => {
             currentLevel++;
@@ -760,6 +810,26 @@
       drawPlayer(player.x, player.y);
 
       ctx.restore();
+
+      // Draw fullscreen buttons
+      if (fullscreenBtn.active) {
+        ctx.fillStyle = '#2b8b57';
+        roundRect(ctx, fullscreenBtn.x, fullscreenBtn.y, fullscreenBtn.w, fullscreenBtn.h, 5, true, false);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fullscreenBtn.text, fullscreenBtn.x + fullscreenBtn.w / 2, fullscreenBtn.y + fullscreenBtn.h / 2);
+      }
+      if (exitFullscreenBtn.active) {
+        ctx.fillStyle = '#b31217';
+        roundRect(ctx, exitFullscreenBtn.x, exitFullscreenBtn.y, exitFullscreenBtn.w, exitFullscreenBtn.h, 5, true, false);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(exitFullscreenBtn.text, exitFullscreenBtn.x + exitFullscreenBtn.w / 2, exitFullscreenBtn.y + exitFullscreenBtn.h / 2);
+      }
     }
 
     function drawPlayer(x, y) {
@@ -802,6 +872,8 @@
       scoreEl.innerText = 'Score: ' + score; livesEl.innerText = 'Lives: ' + lives;
       levelEl.innerText = `Level: ${currentLevel}`;
       messageEl.innerText = 'Use ← → to move, ↑/Space to jump';
+      fullscreenBtn.active = true;
+      exitFullscreenBtn.active = false;
       requestAnimationFrame(loop);
     }
 
